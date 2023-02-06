@@ -43,7 +43,7 @@
 - Edit the `bin/reverse-proxy.ts` file, and change the `domainName` and the `namePrefix`.
 - You can also pass these values as Env variables, as `DOMAIN_NAME` and `NAME_PREFIX` respectively.
 - `npm install`
-- `AWS_PROFILE explority-rp npm run cdk deploy`
+- `AWS_PROFILE=explority-rp npm run cdk deploy`
 
 ## Access to Host header
 
