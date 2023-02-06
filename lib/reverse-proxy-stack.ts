@@ -1,12 +1,10 @@
 import { Construct } from "constructs";
 import {
   AllowedMethods,
-  CachePolicy,
   Distribution,
   Function,
   FunctionCode,
   FunctionEventType,
-  OriginRequestPolicy,
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { Duration, Stack, StackProps } from "aws-cdk-lib";
@@ -74,9 +72,6 @@ export class ReverseProxyStack extends Stack {
           origin: new HttpOrigin("app.explority.com"),
           allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
           viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          cachePolicy: CachePolicy.AMPLIFY,
-          originRequestPolicy:
-            OriginRequestPolicy.ALL_VIEWER_AND_CLOUDFRONT_2022,
         },
         additionalBehaviors: {
           "/login": {
