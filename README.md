@@ -27,6 +27,10 @@
     - Emit certificates to use with CloudFront.
 - [CloudFront](https://aws.amazon.com/cloudfront/)
     - Reverse proxy and CDN, if applicable.
+- [S3 Bucket](https://aws.amazon.com/s3/)
+    - Stores the log files from CloudFront.
+- [Route53](https://aws.amazon.com/route53/)
+    - Domain name.
 
 ## How to deploy
 
