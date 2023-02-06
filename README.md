@@ -7,30 +7,30 @@
 ## Concepts
 
 - Origin
-    - The target destination for the user request.
+  - The target destination for the user request.
 - Behavior
-    - The path matching and the corresponding origin to target.
+  - The path matching and the corresponding origin to target.
 - Cloud Function
-    - Custom configuration, using JavaScript to change the request.
-    - In this case, to add the `subdomain` query parameter.
+  - Custom configuration, using JavaScript to change the request.
+  - In this case, to add the `subdomain` query parameter.
 
 ## Requirements
 
 - [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html)
-    - Allows the creation of AWS infrastructure, using programming languages like TypeScript.
+  - Allows the creation of AWS infrastructure, using programming languages like TypeScript.
 - [NodeJS](https://nodejs.org/en/)
-    - Has tools like npm to run scripts.
+  - Has tools like npm to run scripts.
 
 ## AWS services deployed
 
 - [Certicate Manager](https://aws.amazon.com/certificate-manager/)
-    - Emit certificates to use with CloudFront.
+  - Emit certificates to use with CloudFront.
 - [CloudFront](https://aws.amazon.com/cloudfront/)
-    - Reverse proxy and CDN, if applicable.
+  - Reverse proxy and CDN, if applicable.
 - [S3 Bucket](https://aws.amazon.com/s3/)
-    - Stores the log files from CloudFront.
+  - Stores the log files from CloudFront.
 - [Route53](https://aws.amazon.com/route53/)
-    - Domain name.
+  - Domain name.
 
 ## Configure AWS access
 
@@ -44,3 +44,7 @@
 - You can also pass these values as Env variables, as `DOMAIN_NAME` and `NAME_PREFIX` respectively.
 - `npm install`
 - `npm run cdk deploy`
+
+## Access to Host header
+
+- Please try `host` and `:authority`
