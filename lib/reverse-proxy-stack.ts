@@ -5,6 +5,7 @@ import {
   Function,
   FunctionCode,
   FunctionEventType,
+  OriginRequestPolicy,
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { Duration, Stack, StackProps } from "aws-cdk-lib";
@@ -72,6 +73,8 @@ export class ReverseProxyStack extends Stack {
           origin: new HttpOrigin("app.explority.com"),
           allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
           viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          originRequestPolicy:
+            OriginRequestPolicy.ALL_VIEWER_AND_CLOUDFRONT_2022,
         },
         additionalBehaviors: {
           "/login": {
@@ -85,10 +88,8 @@ export class ReverseProxyStack extends Stack {
               },
             ],
           },
-          "/": {
-            origin: new HttpOrigin("go.explority.com", {
-              originPath: "/experience/id",
-            }),
+          "/experience": {
+            origin: new HttpOrigin("go.explority.com"),
             allowedMethods: AllowedMethods.ALLOW_ALL,
             viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
             functionAssociations: [

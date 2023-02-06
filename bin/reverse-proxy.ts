@@ -3,7 +3,7 @@ import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import { ReverseProxyStack } from "../lib/reverse-proxy-stack";
 
-const domainName = process.env.DOMAIN_NAME || "cloud4hotel.biz";
+const domainName = process.env.DOMAIN_NAME || "explorityapp.com";
 const namePrefix = process.env.NAME_PREFIX || "dev";
 
 const app = new cdk.App();
