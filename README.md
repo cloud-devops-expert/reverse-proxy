@@ -1,14 +1,15 @@
-# Welcome to your CDK TypeScript project
+# Explority Reverse Proxy
 
-This is a blank project for CDK development with TypeScript.
+## Introduction
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+- The project creates a reverse proxy, using the CloudFront AWS service.
 
-## Useful commands
+## Concepts
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+- Origin
+    - The target destination for the user request.
+- Behavior
+    - The path matching and the corresponding origin to target.
+- Cloud Function
+    - Custom configuration, using JavaScript to change the request.
+    - In this case, to add the `subdomain` query parameter.
