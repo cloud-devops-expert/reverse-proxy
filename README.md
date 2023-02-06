@@ -32,8 +32,15 @@
 - [Route53](https://aws.amazon.com/route53/)
     - Domain name.
 
+## Configure AWS access
+
+- Get the AWS Key and AWS Secret from IAM credentials
+  on [AWS](https://us-east-1.console.aws.amazon.com/iamv2/home?region=us-east-1#/home)
+- `aws configure --profile explority-rp`
+
 ## How to deploy
 
 - Edit the `bin/reverse-proxy.ts` file, and change the `domainName` and the `namePrefix`.
 - You can also pass these values as Env variables, as `DOMAIN_NAME` and `NAME_PREFIX` respectively.
+- `npm install`
 - `npm run cdk deploy`
