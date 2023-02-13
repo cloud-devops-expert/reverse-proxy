@@ -43,9 +43,9 @@
 - You can also pass these values as Env variables, as `DOMAIN_NAME` and `NAME_PREFIX` respectively.
 - `npm install`
 - `AWS_PROFILE=explority-rp cdk bootstrap aws://<account number>/us-east-1`
-- `AWS_PROFILE=explority-rp npm run cdk deploy CertificateStack`
+- `AWS_PROFILE=explority-rp cdk deploy CertificateStack`
 - copy the output CertificateStack.CertificateArn = <arn>
-- `AWS_PROFILE=explority-rp npm run cdk deploy ReverseProxyStack --parameters CertificateArn=<arn>`
+- `AWS_PROFILE=explority-rp cdk deploy ReverseProxyStack --parameters CertificateArn=<arn>`
 
 ## Access to Host header
 
