@@ -47,6 +47,14 @@
 - copy the output CertificateStack.CertificateArn = <arn>
 - `AWS_PROFILE=explority-rp cdk deploy ReverseProxyStack --parameters CertificateArn=<arn>`
 
+### Update wildcard domain
+
+- go to https://us-east-1.console.aws.amazon.com/cloudfront/v3/home#/distributions to get the `Distribution domain name`
+- copy the value
+- go to Google Domains
+- create a CNAME for *
+- paste the domain
+
 ## Access to Host header
 
 - Please try `host` and `:authority`
