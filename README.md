@@ -42,7 +42,7 @@
 - Edit the `bin/reverse-proxy.ts` file, and change the `domainName` and the `namePrefix`.
 - You can also pass these values as Env variables, as `DOMAIN_NAME` and `NAME_PREFIX` respectively.
 - `npm install`
-- `AWS_PROFILE=explority-rp npm run cdk CertificateStack`
+- `AWS_PROFILE=explority-rp npm run cdk deploy CertificateStack`
 - copy the output CertificateStack.CertificateArn = <arn>
 - `AWS_PROFILE=explority-rp npm run cdk deploy ReverseProxyStack --parameters CertificateArn=<arn>`
 
