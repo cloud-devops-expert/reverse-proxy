@@ -8,11 +8,9 @@ import {
   OriginRequestPolicy,
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
-import { Duration, Stack, StackProps } from "aws-cdk-lib";
-import { DnsValidatedCertificate } from "aws-cdk-lib/aws-certificatemanager";
-import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
+import { CfnParameter, Duration, Stack, StackProps } from "aws-cdk-lib";
+import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import { HttpOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
-import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { Bucket, BucketEncryption } from "aws-cdk-lib/aws-s3";
 
 interface ReverseProxyStackProps extends StackProps {
@@ -26,22 +24,12 @@ export class ReverseProxyStack extends Stack {
 
     const { namePrefix, domainName } = props;
 
-    const hostedZone = HostedZone.fromLookup(
-      this,
-      `${namePrefix}-${domainName}`,
-      {
-        domainName,
-      }
-    );
+    const certificateArn = new CfnParameter(this, "CertificateArn", {});
 
-    const certificate = new DnsValidatedCertificate(
+    const certificate = Certificate.fromCertificateArn(
       this,
-      `${namePrefix}-certificate`,
-      {
-        region: "us-east-1", // it must be this zone for use the certificate with CloudFormation
-        hostedZone,
-        domainName: `*.${domainName}`,
-      }
+      `${namePrefix}-${domainName}-cert`,
+      certificateArn.valueAsString
     );
 
     const addSubdomainFn = new Function(this, `${namePrefix}-function`, {
@@ -102,11 +90,5 @@ export class ReverseProxyStack extends Stack {
         },
       }
     );
-
-    new ARecord(this, `${namePrefix}-cf-arecord`, {
-      zone: hostedZone,
-      recordName: "*",
-      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
-    });
   }
 }

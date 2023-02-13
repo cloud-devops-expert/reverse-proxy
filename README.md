@@ -20,6 +20,7 @@
     - Allows the creation of AWS infrastructure, using programming languages like TypeScript.
 - [NodeJS](https://nodejs.org/en/)
     - Has tools like npm to run scripts.
+- admin username for the domain to create the Certificate, like `admin@explorityapp.com`
 
 ## AWS services deployed
 
@@ -29,8 +30,6 @@
     - Reverse proxy and CDN, if applicable.
 - [S3 Bucket](https://aws.amazon.com/s3/)
     - Stores the log files from CloudFront.
-- [Route53](https://aws.amazon.com/route53/)
-    - Domain name.
 
 ## Configure AWS access
 
@@ -43,7 +42,9 @@
 - Edit the `bin/reverse-proxy.ts` file, and change the `domainName` and the `namePrefix`.
 - You can also pass these values as Env variables, as `DOMAIN_NAME` and `NAME_PREFIX` respectively.
 - `npm install`
-- `AWS_PROFILE=explority-rp npm run cdk deploy`
+- `AWS_PROFILE=explority-rp npm run cdk CertificateStack`
+- copy the output CertificateStack.CertificateArn = <arn>
+- `AWS_PROFILE=explority-rp npm run cdk deploy ReverseProxyStack --parameters CertificateArn=<arn>`
 
 ## Access to Host header
 
