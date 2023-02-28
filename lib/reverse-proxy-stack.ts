@@ -8,29 +8,35 @@ import {
   OriginRequestPolicy,
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
-import { CfnParameter, Duration, Stack, StackProps } from "aws-cdk-lib";
-import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
+import { CfnOutput, Duration, Fn, Stack, StackProps } from "aws-cdk-lib";
+import {
+  Certificate,
+  CertificateValidation,
+} from "aws-cdk-lib/aws-certificatemanager";
 import { HttpOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { Bucket, BucketEncryption } from "aws-cdk-lib/aws-s3";
+import { StringListParameter } from "aws-cdk-lib/aws-ssm";
 
 interface ReverseProxyStackProps extends StackProps {
   namePrefix: string;
-  domainName: string;
 }
 
 export class ReverseProxyStack extends Stack {
   constructor(scope: Construct, id: string, props: ReverseProxyStackProps) {
     super(scope, id, props);
 
-    const { namePrefix, domainName } = props;
+    const { namePrefix } = props;
 
-    const certificateArn = new CfnParameter(this, "CertificateArn", {});
-
-    const certificate = Certificate.fromCertificateArn(
+    const domainsList = StringListParameter.valueForTypedListParameter(
       this,
-      `${namePrefix}-${domainName}-cert`,
-      certificateArn.valueAsString
+      "/domains/list-1"
     );
+
+    const certificate = new Certificate(this, `${namePrefix}-certificate`, {
+      domainName: Fn.select(0, domainsList),
+      subjectAlternativeNames: domainsList,
+      validation: CertificateValidation.fromDns(),
+    });
 
     const addSubdomainFn = new Function(this, `${namePrefix}-function`, {
       code: FunctionCode.fromFile({
@@ -54,9 +60,9 @@ export class ReverseProxyStack extends Stack {
       this,
       `${namePrefix}-cloudfront-distribution`,
       {
-        logBucket,
-        domainNames: [`*.${domainName}`],
         certificate,
+        logBucket,
+        domainNames: domainsList,
         defaultBehavior: {
           origin: new HttpOrigin("app.explority.com"),
           allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
@@ -90,5 +96,9 @@ export class ReverseProxyStack extends Stack {
         },
       }
     );
+
+    new CfnOutput(this, "DomainName", {
+      value: distribution.distributionDomainName,
+    });
   }
 }
