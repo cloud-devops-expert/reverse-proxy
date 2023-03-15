@@ -3,7 +3,7 @@ import * as AWS from "aws-sdk";
 
 const ssmClient = new AWS.SSM();
 
-const paramName = "/domains/list-1";
+const paramName = process.env.DOMAIN_NAMES_PARAM as string;
 
 export const handler = async (
   event: APIGatewayEvent,

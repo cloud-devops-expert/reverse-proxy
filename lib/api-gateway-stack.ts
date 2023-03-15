@@ -21,17 +21,22 @@ export class ApiGatewayStack extends Stack {
 
     const { namePrefix } = props;
 
+    const domainNamesParam = "/domains/list";
+
     const addDomainFn = new NodejsFunction(this, `${namePrefix}-add-domain`, {
       architecture: Architecture.ARM_64,
       logRetention: RetentionDays.SIX_MONTHS,
       entry: "./lib/lambda-functions/add-domain.ts",
+      environment: {
+        DOMAIN_NAMES_PARAM: domainNamesParam,
+      },
     });
 
     const domainList = StringListParameter.fromListParameterAttributes(
       this,
       `${namePrefix}-domain-list-param`,
       {
-        parameterName: "/domains/list-1",
+        parameterName: domainNamesParam,
       }
     );
 

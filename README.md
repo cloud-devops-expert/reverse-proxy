@@ -20,7 +20,7 @@
     - Allows the creation of AWS infrastructure, using programming languages like TypeScript.
 - [NodeJS](https://nodejs.org/en/)
     - Has tools like npm to run scripts.
-- admin username for the domain to create the Certificate, like `admin@explorityapp.com`
+- Docker installed
 
 ## AWS services deployed
 
@@ -30,6 +30,8 @@
     - Reverse proxy and CDN, if applicable.
 - [S3 Bucket](https://aws.amazon.com/s3/)
     - Stores the log files from CloudFront.
+- API Gateway
+    - Endpoints to support the domain names management.
 
 ## Configure AWS access
 
@@ -39,13 +41,21 @@
 
 ## How to deploy
 
-- Edit the `bin/reverse-proxy.ts` file, and change the `domainName` and the `namePrefix`.
-- You can also pass these values as Env variables, as `DOMAIN_NAME` and `NAME_PREFIX` respectively.
+- Edit cdk-deploy.sh script to adapt the initial values.
 - `npm install`
-- `AWS_PROFILE=explority-rp cdk bootstrap aws://<account number>/us-east-1`
-- `AWS_PROFILE=explority-rp cdk deploy CertificateStack`
-- copy the output CertificateStack.CertificateArn = <arn>
-- `AWS_PROFILE=explority-rp cdk deploy ReverseProxyStack --parameters CertificateArn=<arn>`
+- `./cdk-deploy.sh`
+- Search for `restapiEndpoint` as `<domainNamesEndpoint>`, and copy the value o clipboard.
+- Open a new terminal, replace `<domainNamesEndpoint>` with the clipboard value, and run:
+    - `curl <domainNamesEndpoint>/domains/<domain name> -H "x-api-key: 0c12527c-638e-49e7-a7da-c630a384b909"`
+    - this can be coded as Http client to automate this request
+- It will return the CNAME record information to be created on the domain's owner system.
+
+## Add new domain
+
+- `curl <domainNamesEndpoint>/domains -d '{"domainName": "<new domain>"}' -H "x-api-key:
+  0c12527c-638e-49e7-a7da-c630a384b909"`
+- It will update the `/domains/list` with the new domain
+- Rerun the `./cdk-deploy.sh` to update the certificate and the CloudFront distribution
 
 ### Update wildcard domain
 
