@@ -2,12 +2,11 @@
 
 set -e
 
-#export AWS_PROFILE=explority-rp
-export AWS_PROFILE=cloud4hotel
+export AWS_PROFILE=explority-rp
 
 export NAME_PREFIX=prod
 
-INITIAL_DOMAIN_NAME="*.cloud4hotel.com"
+INITIAL_DOMAIN_NAME="*.explority.com"
 
 cdk bootstrap
 
