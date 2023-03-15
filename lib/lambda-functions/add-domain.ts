@@ -21,7 +21,11 @@ export const handler = async (
     };
   }
 
+  console.log(event.body);
+
   const { domainName } = JSON.parse(event.body);
+
+  console.log({ domainName });
 
   const { Parameter } = await ssmClient
     .getParameter({
@@ -30,6 +34,8 @@ export const handler = async (
     .promise();
 
   let parts = Parameter?.Value?.split(",");
+
+  console.log({ parts });
 
   let newValue = "";
 
@@ -50,6 +56,7 @@ export const handler = async (
     .putParameter({
       Value: newValue,
       Name: paramName,
+      Overwrite: true,
     })
     .promise();
 

@@ -19,7 +19,7 @@ export const handler = async (
 
   const certificates = await acmClient
     .listCertificates({
-      CertificateStatuses: ["ISSUED"],
+      CertificateStatuses: ["PENDING_VALIDATION"],
     })
     .promise();
 

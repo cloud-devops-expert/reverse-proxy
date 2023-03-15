@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
-#export AWS_PROFILE=explority-rp
-export AWS_PROFILE=cloud4hotel
+export AWS_PROFILE=explority-rp
 
 cdk bootstrap
 
-#cdk deploy ReverseProxyStack
+logger -s "Creating Support API..."
+
 cdk deploy ApiGatewayStack
+
+logger -s "Creating Reverse Proxy..."
+
+cdk deploy ReverseProxyStack
