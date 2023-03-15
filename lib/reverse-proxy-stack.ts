@@ -29,7 +29,7 @@ export class ReverseProxyStack extends Stack {
 
     const domainsList = StringListParameter.valueForTypedListParameter(
       this,
-      "/domains/list-1"
+      "/domains/list"
     );
 
     const certificate = new Certificate(this, `${namePrefix}-certificate`, {
