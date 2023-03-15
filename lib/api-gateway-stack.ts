@@ -21,7 +21,7 @@ export class ApiGatewayStack extends Stack {
 
     const { namePrefix } = props;
 
-    const domainNamesParam = "/domains/list";
+    const domainNamesParam = `/${namePrefix}/domains/list`;
 
     const addDomainFn = new NodejsFunction(this, `${namePrefix}-add-domain`, {
       architecture: Architecture.ARM_64,
@@ -72,7 +72,7 @@ export class ApiGatewayStack extends Stack {
     });
 
     const apiKey = restApi.addApiKey(`${namePrefix}-api-key`, {
-      value: "0c12527c-638e-49e7-a7da-c630a384b909",
+      value: "f6f33e38-16e2-451a-830e-aa41731852f6",
     });
 
     const usagePlan = restApi.addUsagePlan(`${namePrefix}-usage-plan`, {});

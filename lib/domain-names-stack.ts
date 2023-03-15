@@ -21,7 +21,7 @@ export class DomainNamesStack extends Stack {
     );
 
     new StringListParameter(this, `${namePrefix}-domain-names-param`, {
-      parameterName: "/domains/list",
+      parameterName: `/${namePrefix}/domains/list`,
       stringListValue: initialDomainNamesParam.valueAsString.split(","),
     });
   }

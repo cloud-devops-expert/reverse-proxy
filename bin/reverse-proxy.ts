@@ -9,7 +9,7 @@ const namePrefix = process.env.NAME_PREFIX as string;
 
 const app = new cdk.App();
 
-new ReverseProxyStack(app, "ReverseProxyStack", {
+new ReverseProxyStack(app, `ReverseProxyStack${namePrefix}`, {
   namePrefix,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
@@ -17,7 +17,7 @@ new ReverseProxyStack(app, "ReverseProxyStack", {
   },
 });
 
-new ApiGatewayStack(app, "ApiGatewayStack", {
+new ApiGatewayStack(app, `ApiGatewayStack${namePrefix}`, {
   namePrefix,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
@@ -25,7 +25,7 @@ new ApiGatewayStack(app, "ApiGatewayStack", {
   },
 });
 
-new DomainNamesStack(app, "DomainNamesStack", {
+new DomainNamesStack(app, `DomainNamesStack${namePrefix}`, {
   namePrefix,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
