@@ -46,7 +46,7 @@
 - `./cdk-deploy.sh`
 - Search for `restapiEndpoint` as `<domainNamesEndpoint>`, and copy the value o clipboard.
 - Open a new terminal, replace `<domainNamesEndpoint>` with the clipboard value, and run:
-    - `curl https://v57pzn42w4.execute-api.us-east-1.amazonaws.com/prod/domains/*.cloud4hotel.com -H "x-api-key: f6f33e38-16e2-451a-830e-aa41731852f6"`
+    - `curl <domainNamesEndpoint>/domains/<new domain> -H "x-api-key: f6f33e38-16e2-451a-830e-aa41731852f6"`
     - this can be coded as Http client to automate this request
 - It will return the CNAME record information to be created on the domain's owner system.
 

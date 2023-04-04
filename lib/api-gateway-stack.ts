@@ -1,7 +1,6 @@
 import { Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import { Architecture } from "aws-cdk-lib/aws-lambda";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import {
   ApiKeySourceType,
@@ -24,7 +23,6 @@ export class ApiGatewayStack extends Stack {
     const domainNamesParam = `/${namePrefix}/domains/list`;
 
     const addDomainFn = new NodejsFunction(this, `${namePrefix}-add-domain`, {
-      architecture: Architecture.ARM_64,
       logRetention: RetentionDays.SIX_MONTHS,
       entry: "./lib/lambda-functions/add-domain.ts",
       environment: {
@@ -44,7 +42,6 @@ export class ApiGatewayStack extends Stack {
     domainList.grantWrite(addDomainFn);
 
     const getCNameFn = new NodejsFunction(this, `${namePrefix}-get-cname`, {
-      architecture: Architecture.ARM_64,
       logRetention: RetentionDays.SIX_MONTHS,
       entry: "./lib/lambda-functions/get-cname.ts",
     });
