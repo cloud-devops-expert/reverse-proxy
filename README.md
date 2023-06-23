@@ -41,35 +41,24 @@
 
 ## How to deploy
 
+### First run
+
 - Edit cdk-deploy.sh script to adapt the initial values.
 - `npm install`
 - `./cdk-deploy.sh`
-- **Note:** The script will freeze on "Creating Reverse Proxy..." waiting for the certificate DNS validation.
-    - Please follow the next lines to get the DNS CNAME record information that has to be created on customers' DNS
-      system.
-    - The service CloudFormation is managing the script, so the local run can be stopped.
 - Search for `restapiEndpoint` as `<domainNamesEndpoint>`, and copy the value to clipboard.
-- Open a new terminal, replace `<domainNamesEndpoint>` with the clipboard value, and run:
-    - `curl <domainNamesEndpoint>/domains/<new domain> -H "x-api-key: f6f33e38-16e2-451a-830e-aa41731852f6"`
-    - this can be coded as Http client to automate this request
-    - the initial `<new domain>` is `*.explority.com`
-- It will return the CNAME record information to be created on the domain's owner system.
 
-## Add new domain
+### New customers
+
+#### Add new domain
 
 - `curl <domainNamesEndpoint>/domains -d '{"domainName": "<new domain>"}' -H "x-api-key:
   f6f33e38-16e2-451a-830e-aa41731852f6"`
-- It will update the `/domains/list` with the new domain
-- Rerun the `./cdk-deploy.sh` to update the certificate and the CloudFront distribution
+    - it will return the list of CNAMEs to create
 
-### Update wildcard domain
+#### Update CloudFront distribution
 
-- go to https://us-east-1.console.aws.amazon.com/cloudfront/v3/home#/distributions to get the `Distribution domain name`
-- copy the value
-- go to Google Domains
-- create a CNAME for *
-- paste the domain
-
-## Access to Host header
-
-- Please try `host` and `:authority`
+- `curl -XPATCH <domainNamesEndpoint>/distribution -H "x-api-key:
+  f6f33e38-16e2-451a-830e-aa41731852f6"`
+    - it will update the CloudFront distribution to include the new domains
+    - it should be run after the CNAMEs are created

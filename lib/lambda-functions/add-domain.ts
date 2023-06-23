@@ -2,8 +2,14 @@ import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import * as AWS from "aws-sdk";
 
 const ssmClient = new AWS.SSM();
+const acmClient = new AWS.ACM();
+const cfClient = new AWS.CloudFront();
 
-const paramName = process.env.DOMAIN_NAMES_PARAM as string;
+const {
+  DOMAIN_NAMES_PARAM: domainNamesParamName,
+  CERTIFICATE_ARN_PARAM: certificateArnParamName,
+  CLOUDFRONT_DISTRIBUTION_ID_PARAM: cloudfrontDistributionIdParamName,
+} = process.env;
 
 export const handler = async (
   event: APIGatewayEvent,
@@ -12,58 +18,144 @@ export const handler = async (
   console.log(`Event: ${JSON.stringify(event, null, 2)}`);
   console.log(`Context: ${JSON.stringify(context, null, 2)}`);
 
-  if (!event.body) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        message: "Missing body",
-      }),
-    };
+  if (!domainNamesParamName) {
+    return badRequest("Missing required parameter: DOMAIN_NAMES_PARAM");
   }
 
-  console.log(event.body);
+  if (!certificateArnParamName) {
+    return badRequest("Missing required parameter: CERTIFICATE_ARN_PARAM");
+  }
+
+  if (!cloudfrontDistributionIdParamName) {
+    return badRequest(
+      "Missing required parameter: CLOUDFRONT_DISTRIBUTION_ID_PARAM"
+    );
+  }
+
+  if (!event.body) {
+    return badRequest("Missing body");
+  }
 
   const { domainName } = JSON.parse(event.body);
 
-  console.log({ domainName });
-
   const { Parameter } = await ssmClient
     .getParameter({
-      Name: paramName,
+      Name: domainNamesParamName,
     })
     .promise();
 
-  let parts = Parameter?.Value?.split(",");
+  const parts = Parameter?.Value?.split(",");
+
+  if (!parts) {
+    return badRequest("Invalid parameter value");
+  }
 
   console.log({ parts });
 
-  let newValue = "";
-
-  if (parts) {
-    if (parts.includes(domainName)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "Domain already exists",
-        }),
-      };
-    }
-
-    newValue = [...parts, domainName].join(",");
+  if (parts.includes(domainName)) {
+    return conflict("Domain already exists");
   }
+
+  const domainList: string[] = [...parts, domainName];
+
+  console.log({ domainList });
 
   await ssmClient
     .putParameter({
-      Value: newValue,
-      Name: paramName,
+      Value: domainList.join(","),
+      Name: domainNamesParamName,
       Overwrite: true,
     })
     .promise();
 
+  const { CertificateArn: certificateArn } = await acmClient
+    .requestCertificate({
+      DomainName: domainList[0],
+      SubjectAlternativeNames: domainList,
+      ValidationMethod: "DNS",
+    })
+    .promise();
+
+  if (!certificateArn) {
+    return badRequest("Failed to create certificate");
+  }
+
+  const { Parameter: certificateArnParam } = await ssmClient
+    .getParameter({
+      Name: certificateArnParamName,
+    })
+    .promise();
+
+  await ssmClient
+    .putParameter({
+      Value: [certificateArn, certificateArnParam?.Value?.split(",")].join(","),
+      Name: certificateArnParamName,
+      Overwrite: true,
+    })
+    .promise();
+
+  let certificate;
+  let tries = 0;
+
+  do {
+    await sleep(1_000);
+
+    const { Certificate } = await acmClient
+      .describeCertificate({
+        CertificateArn: certificateArn!,
+      })
+      .promise();
+
+    certificate = Certificate;
+
+    console.log("tries", ++tries);
+  } while (
+    certificate?.DomainValidationOptions?.some(
+      (value) => value.ValidationMethod === "EMAIL"
+    )
+  );
+
+  const { Parameter: parameter } = await ssmClient
+    .getParameter({
+      Name: cloudfrontDistributionIdParamName,
+    })
+    .promise();
+
+  const { Distribution: distribution } = await cfClient
+    .getDistribution({ Id: parameter?.Value! })
+    .promise();
+
+  const record = certificate?.DomainValidationOptions?.find((option) => {
+    console.log(option.DomainName === domainName, option.DomainName, {
+      domainName,
+    });
+    return option.DomainName === domainName;
+  });
+
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: `Domain ${domainName} inserted.`,
+      [domainName]: [
+        record?.ResourceRecord,
+        { Name: "", Type: "CNAME", Value: distribution?.DomainName },
+      ].filter(Boolean),
     }),
   };
 };
+
+const badRequest = (message: string) => ({
+  statusCode: 400,
+  body: JSON.stringify({
+    message,
+  }),
+});
+
+const conflict = (message: string) => ({
+  statusCode: 409,
+  body: JSON.stringify({
+    message,
+  }),
+});
+
+const sleep = (time: number) =>
+  new Promise((resolve) => setTimeout(resolve, time));

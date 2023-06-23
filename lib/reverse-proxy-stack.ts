@@ -14,8 +14,8 @@ import {
   CertificateValidation,
 } from "aws-cdk-lib/aws-certificatemanager";
 import { HttpOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
-import { Bucket, BucketEncryption } from "aws-cdk-lib/aws-s3";
-import { StringListParameter } from "aws-cdk-lib/aws-ssm";
+import { Bucket, BucketEncryption, ObjectOwnership } from "aws-cdk-lib/aws-s3";
+import { StringListParameter, StringParameter } from "aws-cdk-lib/aws-ssm";
 
 interface ReverseProxyStackProps extends StackProps {
   namePrefix: string;
@@ -38,6 +38,11 @@ export class ReverseProxyStack extends Stack {
       validation: CertificateValidation.fromDns(),
     });
 
+    new StringListParameter(this, `${namePrefix}-certificate-arn-param`, {
+      parameterName: `/${namePrefix}/certificate-arn`,
+      stringListValue: [certificate.certificateArn],
+    });
+
     const addSubdomainFn = new Function(this, `${namePrefix}-function`, {
       code: FunctionCode.fromFile({
         filePath: "lib/cloud-functions/add-subdomain.js",
@@ -53,6 +58,7 @@ export class ReverseProxyStack extends Stack {
           deepArchiveAccessTierTime: Duration.days(180),
         },
       ],
+      objectOwnership: ObjectOwnership.OBJECT_WRITER,
       versioned: true,
     });
 
@@ -94,6 +100,15 @@ export class ReverseProxyStack extends Stack {
             ],
           },
         },
+      }
+    );
+
+    new StringParameter(
+      this,
+      `${namePrefix}-cloudfront-distribution-id-param`,
+      {
+        parameterName: `/${namePrefix}/cloudfront-distribution-id`,
+        stringValue: distribution.distributionId,
       }
     );
 
