@@ -46,7 +46,15 @@
 - Edit cdk-deploy.sh script to adapt the initial values.
 - `npm install`
 - `./cdk-deploy.sh`
+    - if the script stucks (initial domain requires CNAME creation):
+        - go https://us-east-1.console.aws.amazon.com/acm/home?region=us-east-1#/certificates/list
+        - search for Pending state
+        - open the certificate
+        - go to Domains
+            - create the CNAME records according to the list
 - Search for `restapiEndpoint` as `<domainNamesEndpoint>`, and copy the value to clipboard.
+- Search for `DomainName`. It corresponses to the distribution domain name.
+    - go to your DNS server for the initial domain, and create a CNAME pointing to <domainName>
 
 ### New customers
 
