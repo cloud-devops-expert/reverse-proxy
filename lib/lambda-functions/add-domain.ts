@@ -52,11 +52,7 @@ export const handler = async (
 
   console.log({ parts });
 
-  if (parts.includes(domainName)) {
-    return conflict("Domain already exists");
-  }
-
-  const domainList: string[] = [...parts, domainName];
+  const domainList: string[] = [...new Set([...parts, domainName])];
 
   console.log({ domainList });
 
@@ -125,12 +121,23 @@ export const handler = async (
     .getDistribution({ Id: parameter?.Value! })
     .promise();
 
-  const record = certificate?.DomainValidationOptions?.find((option) => {
-    console.log(option.DomainName === domainName, option.DomainName, {
-      domainName,
-    });
-    return option.DomainName === domainName;
-  });
+  let record;
+  tries = 0;
+
+  do {
+    await sleep(1_000);
+
+    record = certificate?.DomainValidationOptions?.find(
+      (option) => option.DomainName === domainName
+    );
+
+    console.log("DomainValidationOptions - tries", ++tries);
+  } while (
+    record?.ValidationStatus === "PENDING_VALIDATION" &&
+    !record?.ResourceRecord
+  );
+
+  console.log(JSON.stringify(record));
 
   return {
     statusCode: 200,
