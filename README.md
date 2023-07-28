@@ -60,13 +60,13 @@
 
 #### Add new domain
 
-- `curl <domainNamesEndpoint>/domains -d '{"domainName": "<new domain>"}' -H "x-api-key:
-  f6f33e38-16e2-451a-830e-aa41731852f6"`
+- `curl <domainNamesEndpoint>/domains -d '{"domainName": "<new domain>"}' -H "x-api-key: f6f33e38-16e2-451a-830e-aa41731852f6"`
     - it will return the list of CNAMEs to create
+    - this call is now idempotent, and should be retried if it timeouts for some reason
 
 #### Update CloudFront distribution
 
-- `curl -XPATCH <domainNamesEndpoint>/distribution -H "x-api-key:
-  f6f33e38-16e2-451a-830e-aa41731852f6"`
+- `curl -XPATCH <domainNamesEndpoint>/distribution -H "x-api-key: f6f33e38-16e2-451a-830e-aa41731852f6"`
     - it will update the CloudFront distribution to include the new domains
     - it should be run after the CNAMEs are created
+    - if the certificate is not ready, the API returns an error explaining why

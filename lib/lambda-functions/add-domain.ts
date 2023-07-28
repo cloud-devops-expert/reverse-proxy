@@ -84,7 +84,12 @@ export const handler = async (
 
   await ssmClient
     .putParameter({
-      Value: [certificateArn, certificateArnParam?.Value?.split(",")].join(","),
+      Value: [
+        ...new Set([
+          certificateArn,
+          ...(certificateArnParam?.Value?.split(",") ?? []),
+        ]),
+      ].join(","),
       Name: certificateArnParamName,
       Overwrite: true,
     })

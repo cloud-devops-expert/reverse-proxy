@@ -10,6 +10,8 @@ import {
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { StringListParameter, StringParameter } from "aws-cdk-lib/aws-ssm";
 import { Distribution } from "aws-cdk-lib/aws-cloudfront";
+import { Rule, Schedule } from "aws-cdk-lib/aws-events";
+import { LambdaFunction } from "aws-cdk-lib/aws-events-targets";
 
 interface ApiGatewayStackProps extends StackProps {
   namePrefix: string;
@@ -49,6 +51,17 @@ export class ApiGatewayStack extends Stack {
           CLOUDFRONT_DISTRIBUTION_ID_PARAM: distributionIdParam,
         },
       }
+    );
+
+    updateDistributionFn.addToRolePolicy(
+      new PolicyStatement({
+        actions: ["acm:DescribeCertificate"],
+        resources: [
+          `arn:aws:acm:${Stack.of(this).region}:${
+            Stack.of(this).account
+          }:certificate/*`,
+        ],
+      })
     );
 
     const domainList = StringListParameter.fromListParameterAttributes(
@@ -154,5 +167,43 @@ export class ApiGatewayStack extends Stack {
         apiKeyRequired: true,
       }
     );
+
+    const cleanupCertificateFn = new NodejsFunction(
+      this,
+      `${namePrefix}-cleanup-fn`,
+      {
+        timeout: Duration.minutes(5),
+        logRetention: RetentionDays.SIX_MONTHS,
+        entry: "./lib/lambda-functions/clean-up-certificate.ts",
+        environment: {
+          CERTIFICATE_ARN_PARAM: certificateArnParam,
+        },
+      }
+    );
+
+    certificateArn.grantWrite(cleanupCertificateFn);
+    certificateArn.grantRead(cleanupCertificateFn);
+
+    cleanupCertificateFn.addToRolePolicy(
+      new PolicyStatement({
+        actions: ["acm:DescribeCertificate", "acm:DeleteCertificate"],
+        resources: [
+          `arn:aws:acm:${Stack.of(this).region}:${
+            Stack.of(this).account
+          }:certificate/*`,
+        ],
+      })
+    );
+
+    cleanupCertificateFn.addToRolePolicy(
+      new PolicyStatement({
+        actions: ["acm:ListCertificates"],
+        resources: ["*"],
+      })
+    );
+
+    new Rule(this, `${namePrefix}-rule`, {
+      schedule: Schedule.rate(Duration.days(1)),
+    }).addTarget(new LambdaFunction(cleanupCertificateFn));
   }
 }
