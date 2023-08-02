@@ -32,11 +32,17 @@ export const handler = async (
     );
   }
 
-  if (!event.body) {
-    return badRequest("Missing body");
-  }
+  const httpMethod = event.httpMethod;
 
-  const { domainName } = JSON.parse(event.body);
+  let domainName = "";
+
+  if (httpMethod !== "GET") {
+    if (!event.body) {
+      return badRequest("Missing body");
+    }
+
+    ({ domainName } = JSON.parse(event.body));
+  }
 
   const { Parameter } = await ssmClient
     .getParameter({
@@ -52,7 +58,19 @@ export const handler = async (
 
   console.log({ parts });
 
-  const domainList: string[] = [...new Set([...parts, domainName])];
+  if (httpMethod == "GET") {
+    return ok({
+      domains: parts,
+    });
+  }
+
+  let domainList: string[];
+
+  if (httpMethod == "POST") {
+    domainList = [...new Set([...parts, domainName])];
+  } else {
+    domainList = [...new Set([...parts.filter((p) => p !== domainName)])];
+  }
 
   console.log({ domainList });
 
@@ -94,6 +112,12 @@ export const handler = async (
       Overwrite: true,
     })
     .promise();
+
+  if (httpMethod == "DELETE") {
+    return ok({
+      message: `${domainName} was deleted.`,
+    });
+  }
 
   let certificate;
   let tries = 0;
@@ -144,16 +168,18 @@ export const handler = async (
 
   console.log(JSON.stringify(record));
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      [domainName]: [
-        record?.ResourceRecord,
-        { Name: "", Type: "CNAME", Value: distribution?.DomainName },
-      ].filter(Boolean),
-    }),
-  };
+  return ok({
+    [domainName]: [
+      record?.ResourceRecord,
+      { Name: "", Type: "CNAME", Value: distribution?.DomainName },
+    ].filter(Boolean),
+  });
 };
+
+const ok = (message: object) => ({
+  statusCode: 200,
+  body: JSON.stringify(message),
+});
 
 const badRequest = (message: string) => ({
   statusCode: 400,

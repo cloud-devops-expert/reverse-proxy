@@ -158,6 +158,14 @@ export class ApiGatewayStack extends Stack {
       apiKeyRequired: true,
     });
 
+    domainsResource.addMethod("DELETE", new LambdaIntegration(addDomainFn), {
+      apiKeyRequired: true,
+    });
+
+    domainsResource.addMethod("GET", new LambdaIntegration(addDomainFn), {
+      apiKeyRequired: true,
+    });
+
     const distributionResource = restApi.root.addResource("distribution");
 
     distributionResource.addMethod(

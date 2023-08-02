@@ -64,6 +64,16 @@
     - it will return the list of CNAMEs to create
     - this call is now idempotent, and should be retried if it timeouts for some reason
 
+#### Delete domain
+
+- `curl -XDELETE <domainNamesEndpoint>/domains -d '{"domainName": "<new domain>"}' -H "x-api-key: f6f33e38-16e2-451a-830e-aa41731852f6"`
+    - it will delete the domain from distribution
+
+#### List domains
+
+- `curl <domainNamesEndpoint>/domains -H "x-api-key: f6f33e38-16e2-451a-830e-aa41731852f6"`
+    - list the current domains
+
 #### Update CloudFront distribution
 
 - `curl -XPATCH <domainNamesEndpoint>/distribution -H "x-api-key: f6f33e38-16e2-451a-830e-aa41731852f6"`

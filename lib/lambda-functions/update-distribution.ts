@@ -81,10 +81,25 @@ export const handler = async (
       return badRequest("Certificate not found");
     }
 
-    if (certificate.Status != "ISSUED") {
+    if (certificate.Status == "FAILED") {
       return badRequest(
-        `Certificate not issued: Invalid status ${certificate.Status}. Please check if customers already updated their own DNS infrastructure.`
+        "Certificate creation failed. Please re-add a domain again to restart the process."
       );
+    }
+
+    if (certificate.Status != "ISSUED") {
+      const pendingValidationDomains =
+        certificate.DomainValidationOptions?.filter(
+          (cert) => cert.ValidationStatus === "PENDING_VALIDATION"
+        ).map((cert) => cert.DomainName);
+
+      return badRequest({
+        message:
+          "Certificate not issued. Please check if customers already updated their own DNS infrastructure.",
+        status: certificate.Status,
+        reason: certificate.FailureReason,
+        domains: pendingValidationDomains,
+      });
     }
 
     distributionConfig.ViewerCertificate!.ACMCertificateArn = certificateArn;
@@ -124,9 +139,13 @@ export const handler = async (
   }
 };
 
-const badRequest = (message: string) => ({
+const badRequest = (message: string | object) => ({
   statusCode: 400,
-  body: JSON.stringify({
-    message,
-  }),
+  body: JSON.stringify(
+    typeof message == "object"
+      ? message
+      : {
+          message,
+        }
+  ),
 });
