@@ -1,5 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import * as AWS from "aws-sdk";
+import { ResourceRecord } from "aws-sdk/clients/acm";
 
 const ssmClient = new AWS.SSM();
 const acmClient = new AWS.ACM();
@@ -10,6 +11,21 @@ const {
   CERTIFICATE_ARN_PARAM: certificateArnParamName,
   CLOUDFRONT_DISTRIBUTION_ID_PARAM: cloudfrontDistributionIdParamName,
 } = process.env;
+
+const createRecord = (
+  resourceRecord: ResourceRecord | undefined,
+  domainName: string
+) => {
+  if (!resourceRecord) return;
+
+  const hostName = resourceRecord.Name.replace(
+    domainName.replace("*.", ""),
+    ""
+  ).replace(/\.+$/, "");
+  const data = resourceRecord.Value.replace(/\.$/, "");
+
+  return { hostName, type: "CNAME", data };
+};
 
 export const handler = async (
   event: APIGatewayEvent,
@@ -168,10 +184,12 @@ export const handler = async (
 
   console.log(JSON.stringify(record));
 
+  const resourceRecord = record?.ResourceRecord;
+
   return ok({
     [domainName]: [
-      record?.ResourceRecord,
-      { Name: "", Type: "CNAME", Value: distribution?.DomainName },
+      createRecord(resourceRecord, domainName),
+      { hostName: "", type: "CNAME", data: distribution?.DomainName },
     ].filter(Boolean),
   });
 };

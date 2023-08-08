@@ -62,6 +62,8 @@
 
 - `curl <domainNamesEndpoint>/domains -d '{"domainName": "<new domain>"}' -H "x-api-key: f6f33e38-16e2-451a-830e-aa41731852f6"`
     - it will return the list of CNAMEs to create
+        - **hostName**: value to fill on Host Name field, if empty, create a CNAME record with hostName field empty
+        - **data**: value to fill on Data field
     - this call is now idempotent, and should be retried if it timeouts for some reason
 
 #### Delete domain
