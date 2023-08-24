@@ -18,10 +18,13 @@ const createRecord = (
 ) => {
   if (!resourceRecord) return;
 
+  const subDomain = domainName.split(".")[0];
+
   const hostName = resourceRecord.Name.replace(
     domainName.replace("*.", ""),
     ""
-  ).replace(/\.+$/, "");
+  ).replace(/\.+$/, subDomain === "*" ? "" : `.${subDomain}`);
+
   const data = resourceRecord.Value.replace(/\.$/, "");
 
   return { hostName, type: "CNAME", data };
@@ -189,7 +192,11 @@ export const handler = async (
   return ok({
     [domainName]: [
       createRecord(resourceRecord, domainName),
-      { hostName: "", type: "CNAME", data: distribution?.DomainName },
+      {
+        hostName: getSubDomain(domainName),
+        type: "CNAME",
+        data: distribution?.DomainName,
+      },
     ].filter(Boolean),
   });
 };
@@ -205,13 +212,7 @@ const badRequest = (message: string) => ({
     message,
   }),
 });
-
-const conflict = (message: string) => ({
-  statusCode: 409,
-  body: JSON.stringify({
-    message,
-  }),
-});
-
 const sleep = (time: number) =>
   new Promise((resolve) => setTimeout(resolve, time));
+
+const getSubDomain = (domain: string) => domain.split(".")[0];

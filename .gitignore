@@ -8,3 +8,4 @@ node_modules
 cdk.out
 !/lib/cloud-functions/*.js
 .idea
+local-scripts
